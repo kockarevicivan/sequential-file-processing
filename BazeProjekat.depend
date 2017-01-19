@@ -1,0 +1,12 @@
+# depslib dependency file v1.0
+1484513278 source:d:\projekti\cppprojekti\bazeprojekat\main.c
+	<stdio.h>
+	<stdlib.h>
+	"functions.h"
+
+1484513366 source:d:\projekti\cppprojekti\bazeprojekat\functions.c
+	<stdio.h>
+	"functions.h"
+
+1484513243 d:\projekti\cppprojekti\bazeprojekat\functions.h
+
