@@ -75,6 +75,94 @@ int choose_active_file(FILE** current_active, char* active_name[]) {
     return 0;
 }
 
+int form_serial_file() {
+
+    //mogu samo slogovi
+    FILE* serial_change = fopen("serial_change.bin", "wb");
+    SYLLABLE_CHANGE temp;
+
+    system("cls");
+
+    while(1) {
+        printf("Unesite opciju: \n");
+        printf("1.Kreiranje sloga\n");
+        printf("2.Izmena sloga\n");
+        printf("3.Brisanje sloga\n");
+        printf("4.Povratak na glavni meni\n");
+
+        int option;
+        fflush(stdin);
+        scanf("%d", &option);
+
+        if(option < 1 || option > 4) {
+            system("cls");
+            printf("Nevalidna opcija. Pokusajte ponovo.\n");
+            continue;
+        }
+        else if(option == 4) {
+            break;
+        }
+
+        printf("Unesite evidencioni broj sloga: \n");
+        int record_number = -1;
+
+        while(1) {
+            fflush(stdin);
+            scanf("%d", &record_number);
+            if(record_number >= 10000000 && record_number <= 99999999) {
+                break;
+            }
+            system("cls");
+            printf("Nevalidan evidencioni broj. Pokusajte ponovo.");
+        }
+
+        system("cls");
+        if(option == 1) {
+            printf("Kreiranje sloga:\n");
+            temp = fill_syllable(record_number);
+            temp.change_type = (ChangeType)option;
+        }
+        else if(option == 2) {
+            printf("Izmena sloga:\n");
+            temp = fill_syllable(record_number);
+            temp.change_type = (ChangeType)option;
+        }
+        else if(option == 3) {
+            printf("Brisanje sloga:\n");
+            temp.record_number = record_number;
+            temp.change_type = (ChangeType)option;
+        }
+        else {
+            return INV_OPT_ERR;
+        }
+
+        fwrite(&temp, sizeof(SYLLABLE_CHANGE), 1, serial_change);
+    }
+
+    fclose(serial_change);
+
+    return 0;
+}
+
+SYLLABLE_CHANGE fill_syllable(int record_number) {
+    SYLLABLE_CHANGE temp;
+    temp.record_number = record_number;
+    ///TODO Make protections
+    fflush(stdin);
+    printf("Unesite ime projekcije: \n");
+    scanf("%s", temp.projection_name);
+
+    fflush(stdin);
+    printf("Unesite sifru sale: \n");
+    scanf("%s", temp.hall_label);
+
+    fflush(stdin);
+    printf("Unesite trajanje projekcije: \n");
+    scanf("%d", &(temp.projection_duration));
+
+    return temp;
+}
+
 void print_file(char* file_name) {
     FILE* active_file = fopen(file_name, "rb");
     BLOCK temp_block;

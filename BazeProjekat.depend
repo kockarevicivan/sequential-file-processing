@@ -10,9 +10,19 @@
 
 1484513243 d:\projekti\cppprojekti\bazeprojekat\functions.h
 
-1484823692 source:d:\githubrepositories\bazeprojekat\functions.c
+1484838317 source:d:\githubrepositories\bazeprojekat\functions.c
 	<stdio.h>
 	"functions.h"
+	"common.h"
 
-1484513243 d:\githubrepositories\bazeprojekat\functions.h
+1484837789 d:\githubrepositories\bazeprojekat\functions.h
+	"common.h"
+
+1484837956 source:d:\githubrepositories\bazeprojekat\main.c
+	<stdio.h>
+	<stdlib.h>
+	"functions.h"
+	"common.h"
+
+1484835950 d:\githubrepositories\bazeprojekat\common.h
 

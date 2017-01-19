@@ -56,8 +56,8 @@ int main()
                     break;
                 }
             case 4:
-                //formiranje serijske
                 {
+                    form_serial_file();
                     break;
                 }
             case 5:
