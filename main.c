@@ -31,9 +31,6 @@ int main()
 
     fclose(bin_file_r);*/
 
-
-
-
     while(1) {
 
         int option = menu();
@@ -61,13 +58,15 @@ int main()
                     break;
                 }
             case 5:
-                //formiranje sekvencijalne
                 {
+                    serial_to_sequential();
+
                     break;
                 }
             case 6:
                 //formiranje izlazne sekvencijalne
                 {
+                    print_sequential();
                     break;
                 }
             case 7:
@@ -100,6 +99,7 @@ int menu() {
             "7. Prikazi sve slogove aktivne datoteke.\n"
             "8. Izlazak.\n\n");
 
+        fflush(stdin);
         scanf("%d", &option);
 
         system("cls");

@@ -191,4 +191,70 @@ void print_file(char* file_name) {
     }
 }
 
+void serial_to_sequential() {
 
+    FILE* bin_file_r = fopen("serial_change.bin", "rb");
+
+    SYLLABLE_CHANGE* ret_array;
+    SYLLABLE_CHANGE temp;
+    int i = 0;
+
+    while(fread(&temp, sizeof(SYLLABLE_CHANGE), 1, bin_file_r)) {
+        ret_array = realloc(ret_array, (i+1) * sizeof(SYLLABLE_CHANGE));
+        ret_array[i] = temp;
+        i++;
+    }
+
+    fclose(bin_file_r);
+
+    ret_array = sort_syllables(ret_array, i);
+
+    FILE* sequential_change = fopen("sequential_change.bin", "wb");
+
+    int k;
+    for(k = 0; k < i; k++) {
+
+        fwrite(&(ret_array[k]), sizeof(SYLLABLE_CHANGE), 1, sequential_change);
+    }
+
+    fclose(sequential_change);
+}
+
+SYLLABLE_CHANGE* sort_syllables(SYLLABLE_CHANGE* raw_data, int n) {
+
+    int i, j;
+    for(i = 0; i < n; i++) {
+        for(j = i; j < n; j++) {
+            SYLLABLE_CHANGE* a = (raw_data+i);
+            SYLLABLE_CHANGE* b = (raw_data+j);
+
+            if(a->record_number > b->record_number) {
+                swap_syllables(a, b);
+            }
+        }
+    }
+
+    return raw_data;
+}
+
+void swap_syllables(SYLLABLE_CHANGE* a, SYLLABLE_CHANGE* b) {
+	SYLLABLE_CHANGE temp;
+	temp = *a;
+	*a = *b;
+	*b = temp;
+}
+
+void print_sequential() {
+    FILE* sequential_change = fopen("sequential_change.bin", "rb");
+
+    SYLLABLE_CHANGE temp;
+
+    int k;
+    for(k = 0; k < 6; k++) {
+        fread(&temp, sizeof(SYLLABLE_CHANGE), 1, sequential_change);
+        printf("%d %s %s %d %d\n", temp.record_number, temp.projection_name, temp.hall_label,
+               temp.projection_duration, (int)temp.change_type);
+    }
+
+    fclose(sequential_change);
+}

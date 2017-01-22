@@ -10,15 +10,15 @@
 
 1484513243 d:\projekti\cppprojekti\bazeprojekat\functions.h
 
-1484838317 source:d:\githubrepositories\bazeprojekat\functions.c
+1485097842 source:d:\githubrepositories\bazeprojekat\functions.c
 	<stdio.h>
 	"functions.h"
 	"common.h"
 
-1484837789 d:\githubrepositories\bazeprojekat\functions.h
+1485097454 d:\githubrepositories\bazeprojekat\functions.h
 	"common.h"
 
-1484837956 source:d:\githubrepositories\bazeprojekat\main.c
+1485097441 source:d:\githubrepositories\bazeprojekat\main.c
 	<stdio.h>
 	<stdlib.h>
 	"functions.h"
