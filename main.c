@@ -64,9 +64,8 @@ int main()
                     break;
                 }
             case 6:
-                //formiranje izlazne sekvencijalne
                 {
-                    print_sequential();
+
                     break;
                 }
             case 7:

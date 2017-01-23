@@ -140,6 +140,7 @@ int form_serial_file() {
     }
 
     fclose(serial_change);
+    free(&temp);
 
     return 0;
 }
@@ -195,13 +196,14 @@ void serial_to_sequential() {
 
     FILE* bin_file_r = fopen("serial_change.bin", "rb");
 
-    SYLLABLE_CHANGE* ret_array;
+    SYLLABLE_CHANGE* ret_array = (SYLLABLE_CHANGE*)malloc(sizeof(SYLLABLE_CHANGE));
     SYLLABLE_CHANGE temp;
     int i = 0;
 
     while(fread(&temp, sizeof(SYLLABLE_CHANGE), 1, bin_file_r)) {
         ret_array = realloc(ret_array, (i+1) * sizeof(SYLLABLE_CHANGE));
         ret_array[i] = temp;
+        printf("%d %s %s %d %d\n", ret_array[i].record_number, ret_array[i].projection_name, ret_array[i].hall_label, ret_array[i].projection_duration, (int)ret_array[i].change_type);
         i++;
     }
 
@@ -216,6 +218,8 @@ void serial_to_sequential() {
 
         fwrite(&(ret_array[k]), sizeof(SYLLABLE_CHANGE), 1, sequential_change);
     }
+
+    free(ret_array);
 
     fclose(sequential_change);
 }
@@ -244,17 +248,3 @@ void swap_syllables(SYLLABLE_CHANGE* a, SYLLABLE_CHANGE* b) {
 	*b = temp;
 }
 
-void print_sequential() {
-    FILE* sequential_change = fopen("sequential_change.bin", "rb");
-
-    SYLLABLE_CHANGE temp;
-
-    int k;
-    for(k = 0; k < 6; k++) {
-        fread(&temp, sizeof(SYLLABLE_CHANGE), 1, sequential_change);
-        printf("%d %s %s %d %d\n", temp.record_number, temp.projection_name, temp.hall_label,
-               temp.projection_duration, (int)temp.change_type);
-    }
-
-    fclose(sequential_change);
-}
