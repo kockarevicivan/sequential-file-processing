@@ -29,4 +29,8 @@ struct block {
     SYLLABLE syllables[F_BLOCK];
 } typedef BLOCK;
 
+struct block_change {
+    SYLLABLE_CHANGE syllables[F_BLOCK];
+} typedef BLOCK_CHANGE;
+
 #endif // COMMON_H_INCLUDED

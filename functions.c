@@ -248,3 +248,220 @@ void swap_syllables(SYLLABLE_CHANGE* a, SYLLABLE_CHANGE* b) {
 	*b = temp;
 }
 
+int form_sequential_final(char* old_active_name) {
+    system("cls");
+
+    // Open necessary files
+    FILE* sequential_internal = fopen("sequential_change.bin", "rb");
+    FILE* old_active = fopen(old_active_name, "rb");
+    FILE* error_file = fopen("error_file.bin", "wb");
+    FILE* final_sequential = fopen("final_sequential.bin", "wb");
+
+    BLOCK block_old, block_temp;
+    BLOCK_CHANGE block_sequential, err_block;
+    SYLLABLE syllable_old, syllable_temp;
+    SYLLABLE_CHANGE syllable_sequential, syllable_err;
+
+    int old_read_status = fread(&block_old, sizeof(BLOCK), 1, old_active);
+    int seq_read_status = fread(&block_sequential, sizeof(BLOCK_CHANGE), 1, sequential_internal);
+
+    int old_count = 0;
+    int seq_count = 0;
+    int write_count = 0;
+    int err_count = 0;
+    while(old_read_status || seq_read_status) {
+        syllable_old = block_old.syllables[old_count];
+        syllable_sequential = block_sequential.syllables[seq_count];
+
+        // end?
+        if(syllable_old.record_number == -5) {
+            old_read_status = 0;
+        }
+        if(syllable_sequential.record_number == -5) {
+            seq_read_status = 0;
+        }
+
+        // Code branches based on status variables
+        if (old_read_status && seq_read_status) {
+            // Syllable doesn't exist(only adding is a valid operation)
+            if (syllable_sequential.record_number < syllable_old.record_number) {
+                if(syllable_sequential.change_type == CREATE) {
+                    syllable_temp.record_number = syllable_sequential.record_number;
+                    strcpy(syllable_temp.projection_name, syllable_sequential.projection_name);
+                    strcpy(syllable_temp.hall_label, syllable_sequential.hall_label);
+                    syllable_temp.projection_duration = syllable_sequential.projection_duration;
+
+                    block_temp.syllables[write_count++] = syllable_temp;
+
+                    if (write_count == F_BLOCK) {
+                        fwrite(&block_temp, sizeof(BLOCK), 1, final_sequential);
+                        write_count = 0;
+                    }
+                }
+                // Anything else is not a valid operation - write to error file
+                else {
+                    // Write to error file
+                    err_block.syllables[err_count++] = syllable_sequential;
+
+                    if (err_count == F_BLOCK) {
+                        fwrite(&err_block, sizeof(BLOCK_CHANGE), 1, error_file);
+                        err_count = 0;
+                    }
+                }
+
+                seq_count++;
+                if (seq_count == F_BLOCK) {
+                    fread(&block_sequential, sizeof(BLOCK_CHANGE), 1, sequential_internal);
+                    seq_count = 0;
+                }
+            }
+            // Syllable exists(only changing and deleting are valid operations)
+            else if (syllable_sequential.record_number == syllable_old.record_number) {
+                if (syllable_sequential.change_type == UPDATE) {
+
+                    syllable_temp.record_number = syllable_sequential.record_number;
+                    strcpy(syllable_temp.projection_name, syllable_sequential.projection_name);
+                    strcpy(syllable_temp.hall_label, syllable_sequential.hall_label);
+                    syllable_temp.projection_duration = syllable_sequential.projection_duration;
+
+                    block_temp.syllables[write_count++] = syllable_temp; //upisemo ga u novi slog
+                    if (write_count == F_BLOCK) {
+                        fwrite(&block_temp, sizeof(BLOCK), 1, final_sequential);
+                        write_count = 0;
+                    }
+                }
+                else if(syllable_sequential.change_type == CREATE) {
+                    // Write to error file
+                    err_block.syllables[err_count++] = syllable_sequential;
+
+                    if (err_count == F_BLOCK) {
+                        fwrite(&err_block, sizeof(BLOCK_CHANGE), 1, error_file);
+                        err_count = 0;
+                    }
+
+                    syllable_temp.record_number = syllable_old.record_number;
+                    strcpy(syllable_temp.projection_name, syllable_old.projection_name);
+                    strcpy(syllable_temp.hall_label, syllable_old.hall_label);
+                    syllable_temp.projection_duration = syllable_old.projection_duration;
+
+                    block_temp.syllables[write_count++] = syllable_temp;
+                    if(write_count == F_BLOCK) {
+                        fwrite(&block_temp, sizeof(BLOCK), 1, final_sequential);
+                        write_count = 0;
+                    }
+                }
+
+                // If delete, just ignore
+
+                seq_count++;
+                old_count++;
+                if(seq_count == F_BLOCK) {
+                    fread(&block_sequential, sizeof(BLOCK_CHANGE), 1, sequential_internal);
+                    seq_count = 0;
+                }
+                if(old_count == F_BLOCK) {
+                    fread(&block_old, sizeof(BLOCK), 1, old_active);
+                    old_count = 0;
+                }
+            }
+            else if (syllable_sequential.record_number > syllable_old.record_number) {
+                syllable_temp.record_number = syllable_old.record_number;
+                strcpy(syllable_temp.projection_name, syllable_old.projection_name);
+                strcpy(syllable_temp.hall_label, syllable_old.hall_label);
+                syllable_temp.projection_duration = syllable_old.projection_duration;
+
+                block_temp.syllables[write_count++] = syllable_temp;
+
+                if (write_count == F_BLOCK) {
+                    fwrite(&block_temp, sizeof(BLOCK), 1, final_sequential);
+                    write_count = 0;
+                }
+
+                old_count++;
+                if (old_count == F_BLOCK) {
+                    fread(&block_old, sizeof(BLOCK), 1, old_active);
+                    old_count = 0;
+                }
+            }
+        }
+        else if(seq_read_status) {
+            syllable_temp.record_number = syllable_old.record_number;
+            strcpy(syllable_temp.projection_name, syllable_old.projection_name);
+            strcpy(syllable_temp.hall_label, syllable_old.hall_label);
+            syllable_temp.projection_duration = syllable_old.projection_duration;
+
+            block_temp.syllables[write_count++] = syllable_temp;
+
+            if (write_count == F_BLOCK) {
+                fwrite(&block_temp, sizeof(BLOCK), 1, final_sequential);
+                write_count = 0;
+            }
+
+            old_count++;
+            if (old_count == F_BLOCK) {
+                fread(&block_old, sizeof(BLOCK), 1, old_active);
+                old_count = 0;
+            }
+        }
+        else if(old_read_status) {
+            if(syllable_sequential.change_type == CREATE) {
+                syllable_temp.record_number = syllable_sequential.record_number;
+                strcpy(syllable_temp.projection_name, syllable_sequential.projection_name);
+                strcpy(syllable_temp.hall_label, syllable_sequential.hall_label);
+                syllable_temp.projection_duration = syllable_sequential.projection_duration;
+
+                block_temp.syllables[write_count++] = syllable_temp;
+
+                if (write_count == F_BLOCK) {
+                    fwrite(&block_temp, sizeof(BLOCK), 1, final_sequential);
+                    write_count = 0;
+                }
+
+                seq_count++;
+                if(seq_count == F_BLOCK) {
+                    fread(&block_old, sizeof(BLOCK_CHANGE), 1, sequential_internal);
+                    seq_count = 0;
+                }
+            }
+            // Trying to edit or remove a non-existing element
+            else {
+                err_block.syllables[err_count++] = syllable_sequential;
+
+                if (err_count == F_BLOCK) {
+                    fwrite(&err_block, sizeof(BLOCK_CHANGE), 1, error_file);
+                    err_count = 0;
+                }
+
+                seq_count++;
+                if (seq_count == F_BLOCK) {
+                    fread(&block_sequential, sizeof(BLOCK_CHANGE), 1, sequential_internal);
+                    seq_count = 0;
+                }
+            }
+
+        }
+    }
+
+    // Write an end syllable
+    block_temp.syllables[write_count++].record_number = -5;
+    err_block.syllables[err_count++].record_number = -5;
+    fwrite(&err_block, sizeof(BLOCK_CHANGE),1, error_file);
+    fwrite(&block_temp, sizeof(BLOCK), 1, final_sequential);
+
+    // Close all opened files
+    fclose(final_sequential);
+    fclose(error_file);
+    fclose(old_active);
+    fclose(sequential_internal);
+
+    //upis iz nove datoteke u aktivnu
+    final_sequential = fopen("final_sequential.bin", "rb");
+    old_active = fopen(old_active_name, "wb");
+    while(fread(&blokNovi, sizeof(Blok), 1, datotekaNova)) {
+        fwrite(&blokNovi, sizeof(Blok), 1, datotekaStara);
+    }
+
+    printf("Nova izlazna sekvencijalna datoteka je formirana.\n");
+
+    return 0;
+}

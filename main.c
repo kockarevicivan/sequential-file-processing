@@ -10,26 +10,6 @@ char active_name[MAX_FILE_NAME];
 int main()
 {
     int i, position;
-    /*FILE* bin_file = fopen("test.bin", "wb");
-
-    for(i = 0; i < 1000; i++) {
-        SYLLABLE tst;
-        tst.record_number = 1234;
-        tst.projection_duration = 1222;
-        fwrite(&tst, sizeof(SYLLABLE), 1, bin_file);
-    }
-    fclose(bin_file);
-
-    FILE* bin_file_r = fopen("test.bin", "rb");
-
-    for(i = 0; i < 1000; i++) {
-        SYLLABLE tst3;
-        fread(&tst3, sizeof(SYLLABLE), 1, bin_file_r);
-        position = ftell(bin_file_r);
-        printf("\n\nPOZICIJA: %p\n\n", position);
-    }
-
-    fclose(bin_file_r);*/
 
     while(1) {
 
